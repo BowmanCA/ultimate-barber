@@ -1,42 +1,665 @@
-On it!Now add the PIN modal HTML and styles:Everything is in place. Let me present the final file:Done! 🔐 Here's what was added:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>The Ultimate Barber</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1a0a00" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Ultimate Barber" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --black:   #0d0700;
+      --deep:    #1a0a00;
+      --brown:   #3b1f0a;
+      --gold:    #c8922a;
+      --gold-lt: #e8b84b;
+      --cream:   #f5e6c8;
+      --white:   #ffffff;
+      --red:     #c0392b;
+      --green:   #27ae60;
+      --radius:  12px;
+      --shadow:  0 4px 24px rgba(0,0,0,0.5);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--black); color: var(--cream); font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
 
----
+    .app-header {
+      background: linear-gradient(135deg, var(--deep) 0%, var(--brown) 100%);
+      border-bottom: 2px solid var(--gold);
+      padding: 16px 20px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-icon { width: 40px; height: 40px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .brand-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--gold-lt); letter-spacing: 1px; line-height: 1; }
+    .brand-sub { font-size: 10px; color: var(--cream); opacity: 0.6; letter-spacing: 2px; text-transform: uppercase; }
+    .mode-toggle { background: var(--brown); border: 1px solid var(--gold); border-radius: 20px; padding: 6px 14px; color: var(--gold-lt); font-size: 12px; font-weight: 600; cursor: pointer; }
 
-## What's New — PIN Protection
+    /* Sync indicator */
+    .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #555; display: inline-block; margin-right: 6px; transition: background 0.3s; }
+    .sync-dot.live { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
+    .sync-dot.error { background: var(--red); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .sync-label { font-size: 10px; color: #888; display: flex; align-items: center; padding: 4px 8px; }
 
-When anyone taps **"Barber Mode"** they now see a full-screen PIN keypad. The app won't unlock barber controls until **1302** is entered correctly. Wrong PIN shows an error and resets. Switching back to Customer Mode requires no PIN.
+    .tab-bar { display: flex; background: var(--deep); border-bottom: 1px solid var(--brown); }
+    .tab { flex: 1; padding: 14px 8px; text-align: center; font-size: 11px; font-weight: 600; color: #666; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .tab.active { color: var(--gold-lt); border-bottom-color: var(--gold); }
+    .tab-icon { font-size: 18px; display: block; margin-bottom: 2px; }
 
----
+    .screen { display: none; padding: 20px; animation: fadeIn 0.2s ease; }
+    .screen.active { display: block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
 
-## Upload to GitHub Now
+    .queue-hero { background: linear-gradient(135deg, var(--deep), var(--brown)); border: 1px solid var(--gold); border-radius: var(--radius); padding: 28px 20px; text-align: center; margin-bottom: 20px; box-shadow: var(--shadow); }
+    .queue-count { font-family: 'Bebas Neue', sans-serif; font-size: 80px; color: var(--gold-lt); line-height: 1; }
+    .queue-label { font-size: 13px; color: var(--cream); opacity: 0.7; text-transform: uppercase; letter-spacing: 2px; margin-top: 4px; }
+    .queue-status { margin-top: 16px; display: inline-block; background: var(--brown); border: 1px solid var(--gold); border-radius: 20px; padding: 6px 16px; font-size: 12px; color: var(--gold-lt); font-weight: 600; }
 
-1. Go to `github.com/BowmanCA/ultimate-barber`
-2. Click **`index.html`** → pencil icon ✏️
-3. Select all → delete → paste the new file contents
-4. Click **"Commit changes"**
+    .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--gold); letter-spacing: 1px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .queue-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .queue-item { background: var(--deep); border: 1px solid var(--brown); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; gap: 14px; }
+    .queue-item.current { border-color: var(--gold); background: linear-gradient(135deg, var(--deep), #2a1200); }
+    .queue-item.next { border-color: #c8922a88; }
+    .q-position { width: 36px; height: 36px; border-radius: 50%; background: var(--brown); border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--gold-lt); flex-shrink: 0; }
+    .queue-item.current .q-position { background: var(--gold); color: var(--black); }
+    .q-info { flex: 1; }
+    .q-name { font-weight: 600; font-size: 15px; color: var(--white); }
+    .q-detail { font-size: 12px; color: #999; margin-top: 2px; }
+    .q-badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-current { background: var(--gold); color: var(--black); }
+    .badge-next { background: var(--brown); color: var(--gold-lt); border: 1px solid var(--gold); }
+    .badge-waiting { background: #1e1e1e; color: #777; }
 
----
+    .notif-banner { display: none; background: linear-gradient(135deg, #1a3a1a, #0d1f0d); border: 1px solid var(--green); border-radius: var(--radius); padding: 16px; margin-bottom: 20px; }
+    .notif-banner.show { display: flex; align-items: center; gap: 12px; animation: slideDown 0.3s ease; }
+    @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+    .notif-icon { font-size: 28px; }
+    .notif-text { flex: 1; }
+    .notif-title { font-weight: 700; color: var(--green); font-size: 14px; }
+    .notif-body { font-size: 12px; color: #aaa; margin-top: 2px; }
+    .notif-close { background: none; border: none; color: #666; font-size: 18px; cursor: pointer; }
 
-## Also Do the Firebase Rules
+    .btn { width: 100%; padding: 16px; border-radius: var(--radius); border: none; font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: 0.5px; text-transform: uppercase; transition: all 0.15s; }
+    .btn:active { transform: scale(0.97); }
+    .btn-gold { background: linear-gradient(135deg, var(--gold), var(--gold-lt)); color: var(--black); }
+    .btn-outline { background: transparent; border: 1px solid var(--gold); color: var(--gold-lt); }
+    .btn-red { background: var(--red); color: white; }
+    .btn-green { background: var(--green); color: white; }
 
-Go to **Firebase Console → Realtime Database → Rules** and paste this, then hit **Publish:**
+    .form-card { background: var(--deep); border: 1px solid var(--brown); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .form-input, .form-select, .form-textarea { width: 100%; background: var(--black); border: 1px solid var(--brown); border-radius: 8px; padding: 13px 14px; color: var(--cream); font-size: 15px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--gold); }
+    .form-select option { background: var(--black); }
 
-```json
-{
-  "rules": {
-    "queue": {
-      ".read": true,
-      ".write": true,
-      "$entry": {
-        ".validate": "newData.hasChildren(['name', 'phone', 'cut', 'status', 'timestamp'])"
+    .cut-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .cut-option { background: var(--black); border: 1px solid var(--brown); border-radius: 10px; padding: 14px 10px; text-align: center; cursor: pointer; transition: all 0.15s; }
+    .cut-option.selected { border-color: var(--gold); background: linear-gradient(135deg, var(--deep), #2a1200); }
+    .cut-option:active { transform: scale(0.96); }
+    .cut-emoji { font-size: 26px; display: block; margin-bottom: 6px; }
+    .cut-name { font-size: 12px; font-weight: 600; color: var(--cream); }
+    .cut-price { font-size: 11px; color: var(--gold); margin-top: 2px; }
+
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; background: var(--black); border: 1px solid var(--brown); border-radius: 10px; padding: 14px 16px; }
+    .toggle-label { font-size: 14px; color: var(--cream); }
+    .toggle-sub { font-size: 11px; color: #666; }
+    .toggle-switch { width: 50px; height: 28px; background: var(--brown); border-radius: 14px; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+    .toggle-switch.on { background: var(--gold); }
+    .toggle-knob { width: 22px; height: 22px; background: white; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: left 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    .toggle-switch.on .toggle-knob { left: 25px; }
+
+    .barber-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: var(--deep); border: 1px solid var(--brown); border-radius: var(--radius); padding: 16px; text-align: center; }
+    .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: var(--gold-lt); line-height: 1; }
+    .stat-lbl { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+    .barber-actions { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+
+    .current-customer-card { background: linear-gradient(135deg, var(--deep), #2a1200); border: 1px solid var(--gold); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; }
+    .cc-title { font-size: 11px; color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 12px; }
+    .cc-name { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--white); }
+    .cc-details { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .cc-tag { background: var(--brown); border: 1px solid var(--gold); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--gold-lt); }
+    .cc-empty { text-align: center; padding: 24px; color: #555; font-size: 14px; }
+
+    .booking-item { background: var(--deep); border: 1px solid var(--brown); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
+    .bi-pos { width: 32px; height: 32px; border-radius: 50%; background: var(--brown); border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--gold); flex-shrink: 0; }
+    .bi-info { flex: 1; }
+    .bi-name { font-weight: 600; font-size: 14px; }
+    .bi-sub { font-size: 11px; color: #777; margin-top: 2px; }
+    .bi-actions { display: flex; gap: 6px; }
+    .btn-icon { width: 34px; height: 34px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .btn-icon-red { background: #2a0d0d; color: var(--red); }
+
+    .empty-state { text-align: center; padding: 40px 20px; color: #555; }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-text { font-size: 14px; }
+
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--brown); border: 1px solid var(--gold); color: var(--cream); padding: 12px 20px; border-radius: 24px; font-size: 13px; font-weight: 600; z-index: 999; transition: transform 0.3s ease; white-space: nowrap; box-shadow: var(--shadow); }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    .mode-label { text-align: center; font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 2px; padding: 6px; background: var(--black); }
+    .divider { border: none; border-top: 1px solid var(--brown); margin: 20px 0; }
+
+    .success-screen { display: none; text-align: center; padding: 40px 20px; animation: fadeIn 0.3s ease; }
+    .success-screen.show { display: block; }
+    .success-icon { font-size: 64px; margin-bottom: 16px; }
+    .success-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--gold-lt); }
+    .success-body { font-size: 14px; color: #888; margin-top: 8px; line-height: 1.6; }
+    .success-pos { font-family: 'Bebas Neue', sans-serif; font-size: 56px; color: var(--gold); margin: 16px 0; }
+
+    .loading-overlay { position: fixed; inset: 0; background: var(--black); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.4s; }
+    .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    .loading-logo { font-size: 56px; margin-bottom: 16px; }
+    .loading-name { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--gold-lt); letter-spacing: 3px; }
+    .loading-bar { width: 160px; height: 3px; background: var(--brown); border-radius: 2px; margin-top: 20px; overflow: hidden; }
+    .loading-fill { height: 100%; background: var(--gold); border-radius: 2px; animation: loadfill 1.5s ease forwards; }
+    @keyframes loadfill { from{width:0} to{width:100%} }
+    /* ── PIN MODAL ── */
+    .pin-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9000; align-items: center; justify-content: center; }
+    .pin-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
+    .pin-box { background: var(--deep); border: 2px solid var(--gold); border-radius: 20px; padding: 32px 28px; text-align: center; width: 300px; box-shadow: 0 8px 40px rgba(0,0,0,0.8); }
+    .pin-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--gold-lt); letter-spacing: 2px; margin-bottom: 6px; }
+    .pin-sub { font-size: 12px; color: #888; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+    .pin-display { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--gold); letter-spacing: 12px; background: var(--black); border: 1px solid var(--brown); border-radius: 10px; padding: 14px 20px; margin-bottom: 10px; }
+    .pin-error { font-size: 12px; color: var(--red); min-height: 20px; margin-bottom: 14px; font-weight: 600; }
+    .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .pin-key { background: var(--brown); border: 1px solid #5a3a1a; border-radius: 12px; color: var(--cream); font-size: 22px; font-weight: 700; padding: 18px 10px; cursor: pointer; transition: all 0.1s; font-family: 'Inter', sans-serif; }
+    .pin-key:active { background: var(--gold); color: var(--black); transform: scale(0.93); }
+    .pin-cancel { background: #2a0d0d; color: var(--red); border-color: var(--red); font-size: 18px; }
+    .pin-del { background: #1a1200; color: var(--gold); font-size: 18px; }
+
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-logo">✂️</div>
+  <div class="loading-name">The Ultimate Barber</div>
+  <div class="loading-bar"><div class="loading-fill"></div></div>
+</div>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-icon">✂️</div>
+    <div>
+      <div class="brand-name">The Ultimate Barber</div>
+      <div class="sync-label"><span class="sync-dot" id="syncDot"></span><span id="syncLabel">Connecting...</span></div>
+    </div>
+  </div>
+  <button class="mode-toggle" onclick="toggleMode()"><span id="modeLabel">Barber Mode</span></button>
+</header>
+
+<div class="mode-label" id="modeBanner">Customer View</div>
+
+<nav class="tab-bar" id="tabBar">
+  <div class="tab active" onclick="showTab('queue')" id="tab-queue"><span class="tab-icon">📋</span>Queue</div>
+  <div class="tab" onclick="showTab('book')" id="tab-book"><span class="tab-icon">✂️</span>Book</div>
+  <div class="tab" onclick="showTab('barber')" id="tab-barber" style="display:none"><span class="tab-icon">💈</span>Barber</div>
+</nav>
+
+<!-- QUEUE SCREEN -->
+<div class="screen active" id="screen-queue">
+  <div class="notif-banner" id="notifBanner">
+    <div class="notif-icon">🔔</div>
+    <div class="notif-text">
+      <div class="notif-title" id="notifTitle">Your turn is coming up!</div>
+      <div class="notif-body" id="notifBody">The barber will be ready for you shortly.</div>
+    </div>
+    <button class="notif-close" onclick="dismissNotif()">✕</button>
+  </div>
+  <div class="queue-hero">
+    <div class="queue-count" id="queueCount">—</div>
+    <div class="queue-label">Customers Waiting</div>
+    <div class="queue-status" id="queueStatusText">Loading...</div>
+  </div>
+  <div class="section-title">💈 Live Queue</div>
+  <div class="queue-list" id="queueList">
+    <div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-text">Loading queue...</div></div>
+  </div>
+</div>
+
+<!-- BOOK SCREEN -->
+<div class="screen" id="screen-book">
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">✅</div>
+    <div class="success-title">You're Booked!</div>
+    <div class="success-pos" id="successPos">#1</div>
+    <div class="success-body" id="successBody"></div>
+    <br/>
+    <button class="btn btn-outline" onclick="resetBooking()">Book Another</button>
+  </div>
+  <div id="bookingForm">
+    <div class="form-card">
+      <div class="section-title">👤 Your Details</div>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" id="custName" type="text" placeholder="e.g. Thabo Nkosi" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input class="form-input" id="custPhone" type="tel" placeholder="e.g. 082 123 4567" />
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="section-title">✂️ Haircut Type</div>
+      <div class="cut-grid" id="cutGrid">
+        <div class="cut-option" onclick="selectCut(this,'Fade')" data-cut="Fade"><span class="cut-emoji">💈</span><div class="cut-name">Fade</div><div class="cut-price">R90</div></div>
+        <div class="cut-option" onclick="selectCut(this,'Line Up')" data-cut="Line Up"><span class="cut-emoji">📐</span><div class="cut-name">Line Up</div><div class="cut-price">R20</div></div>
+        <div class="cut-option" onclick="selectCut(this,'Kids Cut')" data-cut="Kids Cut"><span class="cut-emoji">👦</span><div class="cut-name">Kids Cut</div><div class="cut-price">R70</div></div>
+        <div class="cut-option" onclick="selectCut(this,'Beard Trim')" data-cut="Beard Trim"><span class="cut-emoji">🧔</span><div class="cut-name">Beard Trim</div><div class="cut-price">R20</div></div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="section-title">🎨 Hair Dye</div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Add Hair Dye</div>
+          <div class="toggle-sub">+R125 · Extra 20 min</div>
+        </div>
+        <div class="toggle-switch" id="dyeToggle" onclick="toggleDye()"><div class="toggle-knob"></div></div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Additional Notes (optional)</label>
+        <textarea class="form-textarea" id="custNotes" rows="3" placeholder="e.g. Low fade on sides, leave top long..."></textarea>
+      </div>
+    </div>
+    <button class="btn btn-gold" onclick="submitBooking()">Join the Queue ✂️</button>
+    <br/><br/>
+  </div>
+</div>
+
+<!-- BARBER SCREEN -->
+<div class="screen" id="screen-barber">
+  <div class="barber-stats">
+    <div class="stat-card"><div class="stat-num" id="statWaiting">—</div><div class="stat-lbl">Waiting</div></div>
+    <div class="stat-card"><div class="stat-num" id="statDone">—</div><div class="stat-lbl">Done Today</div></div>
+  </div>
+  <div class="section-title">💈 Current Customer</div>
+  <div class="current-customer-card" id="currentCustomerCard">
+    <div class="cc-empty">Loading...</div>
+  </div>
+  <div class="barber-actions">
+    <button class="btn btn-gold" onclick="notifyNextCustomer()">🔔 Notify Next Customer — Almost Done</button>
+    <button class="btn btn-green" onclick="nextCustomer()">✅ Done — Call Next Customer</button>
+    <button class="btn btn-red" onclick="clearQueue()">🗑️ Clear Entire Queue</button>
+  </div>
+  <hr class="divider"/>
+  <div class="section-title">📋 Full Queue</div>
+  <div id="barberQueueList"><div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-text">Loading...</div></div></div>
+</div>
+
+<!-- PIN MODAL -->
+<div class="pin-overlay" id="pinModal">
+  <div class="pin-box">
+    <div class="pin-title">🔐 Barber Access</div>
+    <div class="pin-sub">Enter your 4-digit PIN</div>
+    <div class="pin-display" id="pinDisplay">· · · ·</div>
+    <div class="pin-error" id="pinError"></div>
+    <div class="pin-grid">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key pin-cancel" onclick="hidePinModal()">✕</button>
+      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key pin-del" onclick="pinKey('del')">⌫</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue, push, update, remove, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD8_JY-sp-zBXmog7XBaEGWi0oQXP943yE",
+    authDomain: "ultimate-barber.firebaseapp.com",
+    databaseURL: "https://ultimate-barber-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "ultimate-barber",
+    storageBucket: "ultimate-barber.firebasestorage.app",
+    messagingSenderId: "477391720245",
+    appId: "1:477391720245:web:9e536a2083918c3f3b067c"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const queueRef = ref(db, 'queue');
+  const metaRef = ref(db, 'meta');
+
+  // Local UI state
+  let isBarberMode = false;
+  let dyeSelected = false;
+  let selectedCut = null;
+  let liveQueue = []; // sorted array from Firebase
+
+  // ── SYNC INDICATOR ──
+  function setSyncStatus(status) {
+    const dot = document.getElementById('syncDot');
+    const lbl = document.getElementById('syncLabel');
+    dot.className = 'sync-dot ' + status;
+    lbl.textContent = status === 'live' ? 'Live' : status === 'error' ? 'Offline' : 'Connecting...';
+  }
+
+  // ── LISTEN TO QUEUE IN REAL TIME ──
+  onValue(queueRef, (snapshot) => {
+    setSyncStatus('live');
+    const data = snapshot.val() || {};
+    // Convert object to sorted array by timestamp
+    liveQueue = Object.entries(data)
+      .map(([id, val]) => ({ id, ...val }))
+      .filter(c => c.status !== 'done')
+      .sort((a, b) => a.timestamp - b.timestamp);
+    renderAll();
+    hideLoading();
+  }, (error) => {
+    setSyncStatus('error');
+    console.error(error);
+  });
+
+  // Listen to meta (done count)
+  let doneCount = 0;
+  onValue(metaRef, (snapshot) => {
+    const data = snapshot.val() || {};
+    doneCount = data.doneCount || 0;
+    document.getElementById('statDone').textContent = doneCount;
+  });
+
+  function hideLoading() {
+    const ol = document.getElementById('loadingOverlay');
+    if (ol) { ol.classList.add('hidden'); setTimeout(() => ol.remove(), 500); }
+  }
+
+  // ── TABS ──
+  window.showTab = function(tab) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('screen-' + tab).classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+  };
+
+  // ── MODE TOGGLE WITH PIN ──
+  const BARBER_PIN = '1302';
+
+  window.toggleMode = function() {
+    if (!isBarberMode) {
+      // Switching TO barber mode — require PIN
+      showPinModal();
+    } else {
+      // Switching back to customer mode — no PIN needed
+      isBarberMode = false;
+      document.getElementById('modeLabel').textContent = 'Barber Mode';
+      document.getElementById('modeBanner').textContent = 'Customer View';
+      document.getElementById('tab-barber').style.display = 'none';
+      window.showTab('queue');
+    }
+  };
+
+  function showPinModal() {
+    document.getElementById('pinModal').classList.add('show');
+    document.getElementById('pinDisplay').textContent = '· · · ·';
+    document.getElementById('pinError').textContent = '';
+    pinEntry = '';
+  }
+
+  window.hidePinModal = function() {
+    document.getElementById('pinModal').classList.remove('show');
+    pinEntry = '';
+  };
+
+  let pinEntry = '';
+
+  window.pinKey = function(val) {
+    if (val === 'del') {
+      pinEntry = pinEntry.slice(0, -1);
+    } else {
+      if (pinEntry.length >= 4) return;
+      pinEntry += val;
+    }
+    // Show dots
+    const dots = ['· · · ·', '● · · ·', '● ● · ·', '● ● ● ·', '● ● ● ●'];
+    document.getElementById('pinDisplay').textContent = dots[pinEntry.length];
+
+    if (pinEntry.length === 4) {
+      setTimeout(() => {
+        if (pinEntry === BARBER_PIN) {
+          document.getElementById('pinModal').classList.remove('show');
+          isBarberMode = true;
+          document.getElementById('modeLabel').textContent = 'Customer Mode';
+          document.getElementById('modeBanner').textContent = '💈 Barber View — Manage your queue';
+          document.getElementById('tab-barber').style.display = 'flex';
+          window.showTab('barber');
+          showToast('🔓 Barber Mode unlocked');
+        } else {
+          document.getElementById('pinError').textContent = '❌ Incorrect PIN. Try again.';
+          pinEntry = '';
+          document.getElementById('pinDisplay').textContent = '· · · ·';
+        }
+      }, 200);
+    }
+  };
+
+  // ── RENDER ──
+  function renderAll() {
+    renderQueue();
+    renderBarberPanel();
+  }
+
+  function renderQueue() {
+    document.getElementById('queueCount').textContent = liveQueue.length;
+    const statusEl = document.getElementById('queueStatusText');
+    if (liveQueue.length === 0) statusEl.textContent = 'No one in queue — walk in welcome!';
+    else if (liveQueue.length === 1) statusEl.textContent = '1 customer in chair';
+    else statusEl.textContent = `~${(liveQueue.length - 1) * 20} min estimated wait`;
+
+    const list = document.getElementById('queueList');
+    if (liveQueue.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-icon">✂️</div><div class="empty-text">Queue is empty — be the first to book!</div></div>`;
+      return;
+    }
+    list.innerHTML = liveQueue.map((c, i) => {
+      const isCurrent = c.status === 'current';
+      const isNext = i === 1;
+      let badgeClass = 'badge-waiting', badgeText = `#${i+1} Waiting`;
+      if (isCurrent) { badgeClass = 'badge-current'; badgeText = 'In Chair'; }
+      else if (isNext) { badgeClass = 'badge-next'; badgeText = "You're Next"; }
+      return `<div class="queue-item ${isCurrent?'current':''} ${isNext?'next':''}">
+        <div class="q-position">${i+1}</div>
+        <div class="q-info">
+          <div class="q-name">${c.name}</div>
+          <div class="q-detail">${c.cut}${c.dye?' · + Dye':''}</div>
+        </div>
+        <span class="q-badge ${badgeClass}">${badgeText}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function renderBarberPanel() {
+    document.getElementById('statWaiting').textContent = liveQueue.length;
+    const current = liveQueue.find(c => c.status === 'current');
+    const card = document.getElementById('currentCustomerCard');
+    if (current) {
+      card.innerHTML = `<div class="cc-title">Now in Chair</div>
+        <div class="cc-name">${current.name}</div>
+        <div class="cc-details">
+          <span class="cc-tag">✂️ ${current.cut}</span>
+          ${current.dye ? '<span class="cc-tag">🎨 Dye</span>' : ''}
+          <span class="cc-tag">📞 ${current.phone}</span>
+          ${current.notes ? `<span class="cc-tag">📝 ${current.notes}</span>` : ''}
+        </div>`;
+    } else if (liveQueue.length > 0) {
+      card.innerHTML = `<div class="cc-empty">Tap "Done — Call Next Customer" to seat <strong>${liveQueue[0].name}</strong>.</div>`;
+    } else {
+      card.innerHTML = `<div class="cc-empty">Queue is empty. Waiting for bookings.</div>`;
+    }
+
+    const bl = document.getElementById('barberQueueList');
+    if (liveQueue.length === 0) {
+      bl.innerHTML = `<div class="empty-state"><div class="empty-icon">✂️</div><div class="empty-text">No bookings yet</div></div>`;
+      return;
+    }
+    bl.innerHTML = liveQueue.map((c, i) => `
+      <div class="booking-item">
+        <div class="bi-pos">${i+1}</div>
+        <div class="bi-info">
+          <div class="bi-name">${c.name}</div>
+          <div class="bi-sub">${c.cut}${c.dye?' + Dye':''} · ${c.phone}</div>
+        </div>
+        <div class="bi-actions">
+          <button class="btn-icon btn-icon-red" onclick="removeCustomer('${c.id}')">✕</button>
+        </div>
+      </div>`).join('');
+  }
+
+  // ── BOOKING ──
+  window.selectCut = function(el, cut) {
+    document.querySelectorAll('.cut-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedCut = cut;
+  };
+
+  window.toggleDye = function() {
+    dyeSelected = !dyeSelected;
+    const tog = document.getElementById('dyeToggle');
+    tog.classList.toggle('on', dyeSelected);
+  };
+
+  window.submitBooking = async function() {
+    const name = document.getElementById('custName').value.trim();
+    const phone = document.getElementById('custPhone').value.trim();
+    const notes = document.getElementById('custNotes').value.trim();
+    if (!name) { showToast('Please enter your name'); return; }
+    if (!phone) { showToast('Please enter your phone number'); return; }
+    if (!selectedCut) { showToast('Please select a haircut type'); return; }
+
+    const noCurrent = !liveQueue.some(c => c.status === 'current');
+    const customer = {
+      name, phone, cut: selectedCut, dye: dyeSelected, notes,
+      status: noCurrent ? 'current' : 'waiting',
+      timestamp: Date.now()
+    };
+
+    try {
+      await push(queueRef, customer);
+      const pos = liveQueue.length + 1;
+      document.getElementById('successPos').textContent = `#${pos}`;
+      document.getElementById('successBody').innerHTML = `You are <strong>#${pos}</strong> in the queue.<br>${pos === 1 ? "You're up first — head to the shop!" : `Estimated wait: ~${(pos-1)*20} min`}<br><br>We'll notify you when your turn is near.`;
+      document.getElementById('bookingForm').style.display = 'none';
+      document.getElementById('successScreen').classList.add('show');
+      selectedCut = null; dyeSelected = false;
+    } catch(e) {
+      showToast('Error saving booking. Check connection.');
+    }
+  };
+
+  window.resetBooking = function() {
+    document.getElementById('bookingForm').style.display = 'block';
+    document.getElementById('successScreen').classList.remove('show');
+    document.getElementById('custName').value = '';
+    document.getElementById('custPhone').value = '';
+    document.getElementById('custNotes').value = '';
+    document.querySelectorAll('.cut-option').forEach(o => o.classList.remove('selected'));
+    document.getElementById('dyeToggle').classList.remove('on');
+    selectedCut = null; dyeSelected = false;
+  };
+
+  // ── BARBER ACTIONS ──
+  window.notifyNextCustomer = function() {
+    if (liveQueue.length < 2) { showToast('No next customer to notify'); return; }
+    const next = liveQueue[1];
+    triggerNotification(`⏰ Almost Your Turn, ${next.name}!`, `The barber is almost done. Get ready — you're next!`, next.name);
+  };
+
+  window.nextCustomer = async function() {
+    const current = liveQueue.find(c => c.status === 'current');
+    try {
+      if (current) {
+        await update(ref(db, `queue/${current.id}`), { status: 'done' });
+        await update(metaRef, { doneCount: doneCount + 1 });
       }
-    },
-    "meta": {
-      ".read": true,
-      ".write": true
+      const nextWaiting = liveQueue.find(c => c.status === 'waiting');
+      if (nextWaiting) {
+        await update(ref(db, `queue/${nextWaiting.id}`), { status: 'current' });
+        triggerNotification(`💈 It's Your Turn, ${nextWaiting.name}!`, `The barber is ready for you now. Please come in.`, nextWaiting.name);
+        showToast(`✅ ${nextWaiting.name} is now in the chair`);
+      } else {
+        showToast('Queue is empty — all done! 🎉');
+      }
+    } catch(e) { showToast('Error updating queue.'); }
+  };
+
+  window.removeCustomer = async function(id) {
+    try {
+      const wasCurrentRemoved = liveQueue.find(c => c.id === id && c.status === 'current');
+      await remove(ref(db, `queue/${id}`));
+      if (wasCurrentRemoved) {
+        const nextWaiting = liveQueue.find(c => c.status === 'waiting' && c.id !== id);
+        if (nextWaiting) await update(ref(db, `queue/${nextWaiting.id}`), { status: 'current' });
+      }
+      showToast('Customer removed');
+    } catch(e) { showToast('Error removing customer.'); }
+  };
+
+  window.clearQueue = async function() {
+    if (!confirm('Clear the entire queue? This cannot be undone.')) return;
+    try {
+      await remove(queueRef);
+      showToast('Queue cleared');
+    } catch(e) { showToast('Error clearing queue.'); }
+  };
+
+  // ── NOTIFICATIONS ──
+  function triggerNotification(title, body, customerName) {
+    document.getElementById('notifTitle').textContent = title;
+    document.getElementById('notifBody').textContent = body;
+    document.getElementById('notifBanner').classList.add('show');
+    showToast(`🔔 Notification sent to ${customerName}`);
+    setTimeout(dismissNotif, 8000);
+    if (Notification.permission === 'granted') {
+      new Notification(title, { body });
     }
   }
-}
-```
 
-Once both are done, the app is fully secured and ready for your brother to use! 💪
+  window.dismissNotif = function() {
+    document.getElementById('notifBanner').classList.remove('show');
+  };
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+  window.showToast = showToast;
+
+  // ── SERVICE WORKER ──
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+
+  // ── NOTIFICATION PERMISSION ──
+  setTimeout(() => {
+    if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+  }, 2000);
+</script>
+</body>
+</html>
