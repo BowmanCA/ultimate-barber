@@ -587,7 +587,23 @@
   window.notifyNextCustomer = function() {
     if (liveQueue.length < 2) { showToast('No next customer to notify'); return; }
     const next = liveQueue[1];
-    triggerNotification(`⏰ Almost Your Turn, ${next.name}!`, `The barber is almost done. Get ready — you're next!`, next.name);
+
+    // Format phone: remove spaces, ensure it starts with country code
+    let phone = next.phone.replace(/\s+/g, '').replace(/[^0-9+]/g, '');
+    // Convert South African 0xx to 27xx
+    if (phone.startsWith('0')) phone = '27' + phone.slice(1);
+    if (phone.startsWith('+')) phone = phone.slice(1);
+
+    const message = encodeURIComponent(
+      `Hi ${next.name}! ✂️ Just a heads-up from *The Ultimate Barber* — the current customer is almost done. Please make your way in, you're up next! 💈`
+    );
+
+    // Open WhatsApp with pre-filled message
+    const waUrl = `https://wa.me/${phone}?text=${message}`;
+    window.open(waUrl, '_blank');
+
+    // Also show in-app notification
+    triggerNotification(`⏰ Almost Your Turn, ${next.name}!`, `WhatsApp opened — tap Send to notify them.`, next.name);
   };
 
   window.nextCustomer = async function() {
@@ -600,7 +616,17 @@
       const nextWaiting = liveQueue.find(c => c.status === 'waiting');
       if (nextWaiting) {
         await update(ref(db, `queue/${nextWaiting.id}`), { status: 'current' });
-        triggerNotification(`💈 It's Your Turn, ${nextWaiting.name}!`, `The barber is ready for you now. Please come in.`, nextWaiting.name);
+
+        // Send WhatsApp to next customer
+        let phone = nextWaiting.phone.replace(/\s+/g, '').replace(/[^0-9+]/g, '');
+        if (phone.startsWith('0')) phone = '27' + phone.slice(1);
+        if (phone.startsWith('+')) phone = phone.slice(1);
+        const message = encodeURIComponent(
+          `Hi ${nextWaiting.name}! 💈 It's your turn at *The Ultimate Barber*! The barber is ready for you now — please come in. See you soon! ✂️`
+        );
+        window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+
+        triggerNotification(`💈 It's Your Turn, ${nextWaiting.name}!`, `WhatsApp opened — tap Send to notify them.`, nextWaiting.name);
         showToast(`✅ ${nextWaiting.name} is now in the chair`);
       } else {
         showToast('Queue is empty — all done! 🎉');
